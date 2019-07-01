@@ -1,0 +1,240 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=GBK">
+<title>Grid Plugins Example</title>
+
+    <link rel="stylesheet" type="text/css" href="example.css" />
+ <link rel="stylesheet" type="text/css" href="toolbar/toolbars.css" />
+    <!-- GC -->
+
+
+    <script type="text/javascript" src="shared/include-ext.js"></script>
+    <script type="text/javascript" src="shared/options-toolbar.js"></script>
+	<script type="text/javascript" src="vbox-form.js"></script>
+	
+    <style type="text/css">
+        .icon-grid {
+            background-image:url(../shared/icons/fam/grid.png) !important;
+        }
+        .add {
+            background-image:url(../shared/icons/fam/add.gif) !important;
+        }
+        .option {
+            background-image:url(../shared/icons/fam/plugin.gif) !important;
+        }
+        .remove {
+            background-image:url(../shared/icons/fam/delete.gif) !important;
+        }
+        .save {
+            background-image:url(../shared/icons/save.gif) !important;
+        }
+        .x-grid-rowbody p {
+            margin: .5em 0;
+        }
+    </style>
+</head>
+<body>
+   <script>
+   Ext.Loader.setConfig({
+		enabled: false
+	});
+
+	Ext.require([
+		'Ext.grid.*',
+		'Ext.data.*',
+		'Ext.form.*',
+		'Ext.tab.*'
+	]);
+	
+	Ext.onReady(function(){
+    Ext.define('Company', {
+        extend: 'Ext.data.Model',
+        fields: [
+            {name: 'company'},
+            {name: 'price'},
+            {name: 'change'},
+            {name: 'pctChange'},
+            {name: 'lastChange', type: 'date', dateFormat: 'n/j h:ia'},
+            {name: 'industry'},
+            {name: 'desc'}
+         ]
+    });
+    // Array data for the grids
+    Ext.grid.dummyData = [
+        ['C001','张先生','9988','等待预检','9/1 12:00am', '15分钟', 'A类'],
+        ['C002','张先生','9988','等待预检','9/1 12:00am', '15分钟', 'A类'],
+        ['C003','张先生','9988','等待预检','9/1 12:00am', '15分钟', 'A类']
+    ];
+
+
+    Ext.QuickTips.init();
+
+    var getLocalStore = function() {
+        return Ext.create('Ext.data.ArrayStore', {
+            model: 'Company',
+            data: Ext.grid.dummyData
+        });
+    };
+	var SamplePanel = Ext.extend(Ext.Panel, {
+        width    : '100%',
+        height   : '98%',
+        bodyPadding: 5,
+        renderTo : Ext.getBody(),
+        autoScroll: true
+    });
+	
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Grid 1
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // row expander
+
+    var grid1 = Ext.create('Ext.grid.Panel', {
+		id: 'grid1',
+        store: getLocalStore(),
+        columns: [
+            {text: "排队号码", width: 200, dataIndex: 'company'},
+            {text: "称谓", dataIndex: 'price'},
+            {text: "呼叫器号", dataIndex: 'change'},
+            {text: "注册时间", width: 135, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'},
+            {text: "队列状态", dataIndex: 'pctChange'},
+			{text: "等待时长", dataIndex: 'industry'}
+        ],
+        columnLines: true,
+        width: 690,
+        height: 330,
+        animCollapse: false,
+        iconCls: 'icon-grid',
+        margin: '0 0 0 0'
+    });
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Grid 2
+    ////////////////////////////////////////////////////////////////////////////////////////
+    var grid2 = Ext.create('Ext.grid.Panel', {
+        id: 'grid2',
+		region: 'center',
+        store: getLocalStore(),
+        columns: [
+            {text: "排队号码", width: 200, dataIndex: 'company'},
+            {text: "称谓",dataIndex: 'price'},
+            {text: "呼叫器号", dataIndex: 'change'},
+            {text: "注册时间", width: 135, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'},
+            {text: "队列状态", dataIndex: 'desc'}
+        ],
+        columnLines: true,
+        width: 700,
+        height: 350,
+        frame: true,
+        title: '超时等候信息',
+        iconCls: 'icon-grid',
+        margin: '0 0 10 0'
+    });
+	
+	var grid3 = Ext.create('Ext.grid.Panel', {
+        id: 'grid3',
+		region: 'center',
+        store: getLocalStore(),
+        columns: [
+            {text: "排队号码", width: 200, dataIndex: 'company'},
+            {text: "称谓",dataIndex: 'price'},
+            {text: "呼叫器号", dataIndex: 'change'},
+            {text: "注册时间", width: 135, renderer: Ext.util.Format.dateRenderer('m/d/Y'), dataIndex: 'lastChange'},
+            {text: "队列状态", dataIndex: 'desc'}
+        ],
+        columnLines: true,
+        frame: true,
+        title: '等候首次呼叫',
+        iconCls: 'icon-grid',
+        margin: '0 0 10 0'
+    });
+	var tabs =  Ext.create('Ext.tab.Panel', {
+        width: 700,
+		height: 350,
+        activeTab: 0,
+		region: 'north',
+		title:'未完成状态',
+		
+        defaults :{
+            bodyPadding: 5
+        },
+		
+        items: [{
+            title: '1号(5/10)',
+			items: ['grid1']
+        },{
+            title: '2号(3/5)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '3号(2/1)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '4号(2/3)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '5号(2/3)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '6号(5/10)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '7号(7/10)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '8号(6/10)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: '9号(4/8)',
+			html: "I am tab 4's content. I also have an event listener attached."
+        }],
+        margin: '0 0 10 0'
+    });
+	
+	var tabs1 =  Ext.create('Ext.tab.Panel', {
+		height: '100%',
+        activeTab: 0,
+		title:'按服务类型分类',
+		region: 'east',
+		width:'48%',
+        defaults :{
+            bodyPadding: 5
+        },
+		
+        items: [{
+            title: 'A类',
+			items: ['grid3']
+        },{
+            title: 'B类',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: 'C类',
+			html: "I am tab 4's content. I also have an event listener attached."
+        },{
+            title: 'D类',
+			html: "I am tab 4's content. I also have an event listener attached."
+        }],
+        margin: '0 0 10 0'
+    });
+	
+	new SamplePanel({
+        title: '大堂经理管理',
+        tbar: [{
+            xtype:'buttongroup',
+            items: [{
+                text: '退出',
+                iconCls: 'add16',
+                scale: 'small'
+            },{
+                text: '设置',
+                iconCls: 'add16',
+                scale: 'small'
+            }]
+        }],
+		layout:'border',
+		items: [{ items:[tabs,grid2], region: 'center',width:'52%'},tabs1]	
+    });
+
+});
+   </script>
+
+</body>
+</html>

@@ -1,0 +1,94 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=GBK">
+<title>Grid Plugins Example</title>
+
+    <link rel="stylesheet" type="text/css" href="http://dev.sencha.com/deploy/dev/resources/css/ext-all.css">
+    <!-- GC -->
+
+
+	<script type="text/javascript" src="http://dev.sencha.com/deploy/dev/adapter/ext/ext-base.js"></script><!-- ENDLIBS -->
+
+    <script type="text/javascript" src="http://dev.sencha.com/deploy/dev/ext-all.js"></script><!-- DESKTOP -->
+   
+</head>
+<body>
+   <script>
+Ext.MyPanel=Ext.extend(Ext.Panel ,{
+xtype:"panel",
+	title:"虚拟呼叫器",
+	width:900,
+	height:600,
+	autoScroll:false,
+	layout:"absolute",
+	initComponent: function(){
+		this.tbar=[
+			{
+				xtype:"tbtext",
+				text:"退出"
+			}
+		]
+		this.items=[
+			
+			{
+				xtype:"panel",
+				title:"",
+				x:0,
+				y:450,
+				width:900,
+				height:100,
+				autoScroll:true,
+				layout:"absolute",
+				items:[
+					{
+						xtype:"button",
+						text:"回呼",
+						x:20,
+						y:30,
+						minWidth:80,
+						style:"height:30"
+					},
+					{
+						xtype:"button",
+						text:"维修",
+						x:140,
+						y:30,
+						minWidth:80,
+						style:"height:30"
+					},
+					{
+						xtype:"button",
+						text:"预检",
+						x:270,
+						y:30,
+						minWidth:80,
+						style:"height:30"
+					},
+					{
+						xtype:"button",
+						text:"跳过",
+						x:400,
+						y:30,
+						minWidth:80,
+						style:"height:30"
+					},
+					{
+						xtype:"button",
+						text:"完成",
+						x:530,
+						y:30,
+						minWidth:80,
+						style:"height:30"
+					}
+				]
+			}
+		]
+		Ext.MyPanel.superclass.initComponent.call(this);
+	}
+});
+
+new Ext.MyPanel(this);
+   </script>
+
+</body>
+</html>

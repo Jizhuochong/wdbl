@@ -1,0 +1,21 @@
+package com.capinfo.wdbl.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.capinfo.base.service.impl.BaseServiceImpl;
+import com.capinfo.wdbl.bean.file_process.File_Handle;
+import com.capinfo.wdbl.dao.FileHandleDao;
+import com.capinfo.wdbl.service.FileHandleService;
+
+@Service
+public class FileHandleServiceImpl extends BaseServiceImpl implements FileHandleService{
+	
+	@Autowired
+	private FileHandleDao fileHandleDao;
+	
+	@Override
+	public File_Handle getLastHandle(Long fid) {
+		return fileHandleDao.getLastHandle(fid);
+	}
+}

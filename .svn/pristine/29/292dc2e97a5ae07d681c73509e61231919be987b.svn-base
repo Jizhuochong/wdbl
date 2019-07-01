@@ -1,0 +1,304 @@
+/**
+ * 
+ */
+
+Ext.define('Wdbl.view.FileRegTab', {extend : 'Ext.tab.Panel',
+	requires : ['Ext.*','Wdbl.form.op.*'],
+	layout : 'fit',
+	//id : 'fileRegTab',
+	border : false,
+	frame : true,
+	innerGrid : null,
+	label_search_win: null,
+	api : {
+		add : null,// 添加
+		load : null,// 加载
+		edit : null,// 修改
+		del : null, // 删除
+		toSend :null
+	},
+	/**
+	 * 添加
+	 */
+	$add : function(docType,docTypeName) {
+		var me = this;
+		var formTypeName = 'Wdbl.form.' + WDBL$Globals.DocTypeEditForms[docType];
+		this.add(Ext.create(formTypeName,{
+			parent:me,
+			tooltip : '新建:'+docTypeName,
+			title:'新建'+docTypeName,
+			closable: true,
+			grid:me.innerGrid,
+			loadUrl : this.api.load,
+			addType:'newAdd',
+	        url : this.api.edit
+		})).show();
+	},
+	/**
+	 * 编辑
+	 */
+	$edit : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("提示", "没有选中任何记录，无法进行编辑！");
+			return;
+		}
+		var selected = me.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提示", "只能编辑一条记录！");
+			return;
+		}
+		var title = selected[0].data.title;
+		var docType = selected[0].data.docType;
+		var formTypeName = 'Wdbl.form.' + WDBL$Globals.DocTypeEditForms[docType];
+		this.add(Ext.create(formTypeName,{
+			tooltip : '编辑:'+title,
+        	title:'编辑'+title,
+        	closable: true,
+	        parent:me,
+	        grid:me.innerGrid,
+	        load:true,
+	        loadUrl : this.api.load,
+	        loadParam : {'id' : id},
+	        addType:'newEdit',
+	        url : this.api.edit
+        })).show();
+	},
+	/**
+	 * 删除
+	 */
+	$del : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有任何行被选中，无法进行删除操作！");
+			return;
+		}
+		var delFlag = false;
+		Ext.Msg.confirm("警告", "确定要删除吗？", function(button) {
+			if (button == "yes") {
+				me.delData();
+			}
+		}, this);
+		
+	},
+	//private 
+	delData : function(){
+		var me = this;
+		var selected = me.innerGrid.selModel.getSelection();
+		var ids = [];
+		Ext.each(selected, function(item) {ids.push(item.data.id);});
+		Ext.Ajax.request({
+			url : this.api.del,
+			method : "post",
+			params : {ids : ids},
+			scope : this,
+			success : function(response, opts) {
+				var json = Ext.JSON.decode(response.responseText);
+				Ext.Msg.alert('系统提示', json.msg);
+				if (json.success) {
+					me.innerGrid.store.reload();
+				}
+			},
+			failure : function() {
+				Ext.Msg.alert('系统提示','删除失败,请刷新后重新操作!');
+			}
+		}, this);
+	},
+	// 打印审批单
+	$f_print : function(docType) {
+		if (this.innerGrid.selModel.hasSelection()) {
+			var selected = this.innerGrid.selModel.getSelection();
+			var id = selected[0].data.id;
+			if (selected.length == 1 && id != null) {
+				var row = this.$getSelectedData;
+				var _url = 'file_export/'+ docType + '/' + id + '/exportFile.do';
+				window.open(_url);
+			} else {
+				Ext.Msg.alert("提醒", "只能编辑一条记录！");
+			}
+		} else {
+			Ext.Msg.alert("错误", "没有任何行被选中，无法进行编辑操作！");
+		}
+	},
+	// 拟办
+	$f_draft : function() {
+		var me = this;
+		if (!this.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有任何行被选中，无法进行编辑操作！");
+			return;
+		}
+		var selected = this.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提醒", "只能编辑一条记录！");
+			return;
+		}
+		var process_common = Ext.create('Wdbl.form.op.submitForm',{recordID:id, store:me.innerGrid.store, gridpanel:me.innerGrid});
+		process_common.showWin();
+	},
+	// 修改类型
+	$f_update_type : function() {
+		var me = this;
+		if (!this.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有任何行被选中，无法进行编辑操作！");
+			return;
+		}
+		var selected = this.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提醒", "只能编辑一条记录！");
+			return;
+		}
+		var update_docType_common = Ext.create('Wdbl.form.op.updateTypeForm',{recordID:id, store:me.innerGrid.store, gridpanel:me.innerGrid});
+		update_docType_common.showWin();
+	},
+	//按条码查询
+	$code_search : function(){
+		var gunSearchFrame = Ext.create('Ext.ux.IFrame',{
+	        closable: true,
+	        border:false,
+	        src:'gunSearch.jsp?r='+Math.random()
+		});
+		this.label_search_win = Ext.create('Ext.window.Window',{
+			title:'扫描二维码',
+		    layout: 'fit',  
+		    modal: true, 
+		    plain:true,
+		    width: 480,
+		    height:310,
+		    border: 0,
+		    frame: true,
+		    items: gunSearchFrame
+		});
+		this.label_search_win.show();
+		
+	},
+	//扫描枪扫描后的代码处理
+	$analysis_code : function(params){
+		var me = this;
+		Ext.apply(me.innerGrid.store.proxy.extraParams, params);
+		me.innerGrid.store.loadPage(1);
+		this.label_search_win.close();
+	},
+	// 送阅
+	$f_toread : function() {
+		var me = this;
+		var selected = me.innerGrid.selModel.getSelection();
+		var ids = [];
+		Ext.each(selected, function(item) {ids.push(item.data.id);});
+		Ext.Ajax.request({
+			url : this.api.toSend,
+			method : "post",
+			params : {ids : ids},
+			scope : this,
+			success : function(response, opts) {
+				var json = Ext.JSON.decode(response.responseText);
+				Ext.Msg.alert('系统提示',json.msg);
+				if (json.success) {
+					me.innerGrid.store.reload();
+				}
+			},
+			failure : function() {
+				Ext.Msg.alert('系统提示','送阅失败,请刷新后重新操作!');
+			}
+		}, this);
+	},
+	// 打印条码
+	$f_tm : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有选中任何记录，无法进行打印条码！");
+			return;
+		}
+		var selected = me.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提醒", "只能打印一条条码！");
+			return;
+		}
+	    PrintLabel5025(
+	    "create", 
+	    "自动", 
+		selected[0].data.barNo?selected[0].data.barNo:"无",
+		selected[0].data.receiveTime?selected[0].data.receiveTime:"无", 
+		selected[0].data.fromUnit?selected[0].data.fromUnit:"无", 
+		selected[0].data.receiveTime?selected[0].data.receiveTime:"无", 
+		selected[0].data.docType?selected[0].data.docType:"无",
+		selected[0].data.docNumber?selected[0].data.docNumber:"无",
+	    selected[0].data.urgencyDegree?selected[0].data.urgencyDegree:"无",
+	    selected[0].data.securityGrade?selected[0].data.securityGrade:"无", 
+	    "无", 
+	    selected[0].data.fromUnit?selected[0].data.fromUnit:"无", 
+	    selected[0].data.title?selected[0].data.title:"无", 
+	    selected[0].data.fromUnit?selected[0].data.fromUnit:"无", 
+	    "", //other
+	    selected[0].data.barNo.replace(/(^\s*)/g,"   "), "", "", "", 10, 10,  2);
+		
+	},
+	initComponent : function() {
+		var me = this;
+		var editBtn = Ext.create('Ext.button.Button',{text : '编辑',iconCls : 'table_edit',handler : function(){me.$edit();}});
+		var tmBtn = Ext.create('Ext.button.Button',{text : '打印条码',iconCls : 'attach',handler : function(){me.$f_tm()}});
+		var searchBtn = Ext.create('Ext.button.Button',{text : '条码查询',iconCls : 'page_code',handler : function(){me.$code_search()}});
+		var updateTypeBtn = Ext.create('Ext.button.Button',{text : '修改类型',iconCls : 'report_edit',handler : function(){me.$f_update_type()}});
+		var delBtn = Ext.create('Ext.button.Button',{text : '删除',iconCls : 'delete',handler : function(){me.$del()}});
+		var printBtn = Ext.create('Ext.button.Button',{text : '公文收件',iconCls : 'printer',handler : function(){me.$f_print('CITY_GOV_DOC');}});
+		var printTelegraphBtn = Ext.create('Ext.button.Button',{text : '密码收件',iconCls : 'printer',handler : function(){me.$f_print('CIPHER_TELEGRAPH_DOC');}});
+		var draftBtn = Ext.create('Ext.button.Button',{text : '呈送',iconCls : 'report_edit',handler : function(){me.$f_draft()}});
+		var btns = [editBtn,tmBtn,searchBtn,updateTypeBtn,delBtn,printBtn,printTelegraphBtn,draftBtn];
+		Ext.applyIf(me, {
+			xtype:'tabpanel',
+			layout : 'fit',
+			activeTab: 0,
+            minTabWidth : 100,
+            maxTabWidth : 100,
+            items : [this.innerGrid],
+			dockedItems: [{
+				xtype:'toolbar',
+				dock:'top',
+				items:[{
+					xtype:'button',
+					text : '添加',
+					iconCls:'add',
+					menu:[
+						{text : '局长批示件', handler : function(){me.$add(5,'局长批示件');}},
+						{text : '主要领导文件', handler : function(){me.$add(12,'主要领导文件');}},
+						{text : '局内文件', handler : function(){me.$add(6,'局内文件');}},
+						{text : '上级领导批示件', handler : function(){me.$add(14,'上级领导批示件');}},
+						{text : '市委市政府正式文件', handler : function(){me.$add(1,'市委市政府正式文件');}},
+						{text : '公安部正式文件', handler : function(){me.$add(4,'公安部正式文件');}},
+						{text : '大范围分发文件', handler : function(){me.$add(2,'大范围分发文件');}},
+						{text : '密码电报', handler : function(){me.$add(13,'密码电报');}},
+						{text : '电话记录', handler : function(){me.$add(3,'电话记录');}},
+						{text : '领导交办件', handler : function(){me.$add(7,'领导交办件');}},
+						{text : '领导兼职', handler : function(){me.$add(8,'领导兼职');}},
+						{text : '直接转文', handler : function(){me.$add(9,'直接转文');}},
+						{text : '亲启件', handler : function(){me.$add(10,'亲启件');}},
+						{text : '其它', handler : function(){me.$add(11,'其它');}}
+					]
+				}, {xtype : "tbseparator"}, 
+				editBtn,{xtype : "tbseparator"}, 
+				tmBtn,{xtype : "tbseparator"}, 
+				searchBtn,{xtype : "tbseparator"}, 
+				updateTypeBtn, {xtype : "tbseparator"}, 
+				delBtn, {xtype : "tbseparator"}, 
+				printBtn, {xtype : "tbseparator"}, 
+				printTelegraphBtn, {xtype : "tbseparator"}, 
+				draftBtn]
+			}],
+            listeners:{
+            	tabchange : function(tabPanel, newCard, oldCard) {
+					if(newCard.id == me.innerGrid.id){
+						Ext.Array.each(btns,function(name,index,_self){btns[index].setDisabled(false);});
+						me.innerGrid.getStore().reload();
+					}else{
+						Ext.Array.each(btns,function(name,index,_self){btns[index].setDisabled(true);});
+					}
+				}
+            }
+			
+		});
+		me.callParent(arguments);
+	}
+});

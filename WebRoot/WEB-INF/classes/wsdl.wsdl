@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://www.dfky.com.cn/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://www.dfky.com.cn/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types/>
+  <wsdl:message name="FileSaveSoapIn">
+    <wsdl:part name="filecode" type="s:string"/>
+    <wsdl:part name="cometime" type="s:string"/>
+    <wsdl:part name="comedept" type="s:string"/>
+    <wsdl:part name="comeno" type="s:string"/>
+    <wsdl:part name="filename" type="s:string"/>
+    <wsdl:part name="filetitle" type="s:string"/>
+    <wsdl:part name="filesecret" type="s:string"/>
+    <wsdl:part name="fileemerg" type="s:string"/>
+    <wsdl:part name="filelimittime" type="s:string"/>
+    <wsdl:part name="oldlabelinfo" type="s:string"/>
+    <wsdl:part name="deptname" type="s:string"/>
+    <wsdl:part name="deptcode" type="s:string"/>
+    <wsdl:part name="username" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="FileSaveSoapOut">
+    <wsdl:part name="FileSaveResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateFileSoapIn">
+    <wsdl:part name="filecode" type="s:string"/>
+    <wsdl:part name="cometime" type="s:string"/>
+    <wsdl:part name="comedept" type="s:string"/>
+    <wsdl:part name="comeno" type="s:string"/>
+    <wsdl:part name="filename" type="s:string"/>
+    <wsdl:part name="filetitle" type="s:string"/>
+    <wsdl:part name="filesecret" type="s:string"/>
+    <wsdl:part name="fileemerg" type="s:string"/>
+    <wsdl:part name="filelimittime" type="s:string"/>
+    <wsdl:part name="oldlabelinfo" type="s:string"/>
+    <wsdl:part name="deptname" type="s:string"/>
+    <wsdl:part name="deptcode" type="s:string"/>
+    <wsdl:part name="username" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateFileSoapOut">
+    <wsdl:part name="UpdateFileResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteFileSoapIn">
+    <wsdl:part name="filecode" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteFileSoapOut">
+    <wsdl:part name="DeleteFileResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="FileRangeSaveSoapIn">
+    <wsdl:part name="filecode" type="s:string"/>
+    <wsdl:part name="getdeptlist" type="s:string"/>
+    <wsdl:part name="deptname" type="s:string"/>
+    <wsdl:part name="username" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="FileRangeSaveSoapOut">
+    <wsdl:part name="FileRangeSaveResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="AddUserSoapIn">
+    <wsdl:part name="username" type="s:string"/>
+    <wsdl:part name="usercode" type="s:string"/>
+    <wsdl:part name="password" type="s:string"/>
+    <wsdl:part name="userdept" type="s:string"/>
+    <wsdl:part name="userorder" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="AddUserSoapOut">
+    <wsdl:part name="AddUserResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateUserSoapIn">
+    <wsdl:part name="username" type="s:string"/>
+    <wsdl:part name="usercode" type="s:string"/>
+    <wsdl:part name="password" type="s:string"/>
+    <wsdl:part name="userdept" type="s:string"/>
+    <wsdl:part name="userorder" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateUserSoapOut">
+    <wsdl:part name="UpdateUserResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteUserSoapIn">
+    <wsdl:part name="usercode" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteUserSoapOut">
+    <wsdl:part name="DeleteUserResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="AddDeptInSoapIn">
+    <wsdl:part name="DeptName" type="s:string"/>
+    <wsdl:part name="DeptCode" type="s:string"/>
+    <wsdl:part name="DeptOrder" type="s:string"/>
+    <wsdl:part name="Remark" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="AddDeptInSoapOut">
+    <wsdl:part name="AddDeptInResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateDeptInSoapIn">
+    <wsdl:part name="DeptName" type="s:string"/>
+    <wsdl:part name="DeptCode" type="s:string"/>
+    <wsdl:part name="DeptOrder" type="s:string"/>
+    <wsdl:part name="Remark" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="UpdateDeptInSoapOut">
+    <wsdl:part name="UpdateDeptInResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteDeptInSoapIn">
+    <wsdl:part name="DeptCode" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteDeptInSoapOut">
+    <wsdl:part name="DeleteDeptInResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="FileInBoxSaveSoapIn">
+    <wsdl:part name="filecode" type="s:string"/>
+    <wsdl:part name="senddept" type="s:string"/>
+    <wsdl:part name="getdept" type="s:string"/>
+    <wsdl:part name="shouldcount" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="FileInBoxSaveSoapOut">
+    <wsdl:part name="FileInBoxSaveResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteInBoxFileSoapIn">
+    <wsdl:part name="filecode" type="s:string"/>
+    <wsdl:part name="getdept" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="DeleteInBoxFileSoapOut">
+    <wsdl:part name="DeleteInBoxFileResult" type="s:boolean"/>
+  </wsdl:message>
+  <wsdl:message name="SearchWaitQFileSoapIn">
+    <wsdl:part name="deptname" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="SearchWaitQFileSoapOut">
+    <wsdl:part name="SearchWaitQFileResult" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="SearchEmergSoapIn">
+    <wsdl:part name="_deptName" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="SearchEmergSoapOut">
+    <wsdl:part name="SearchEmergResult" type="s:string"/>
+  </wsdl:message>
+  <wsdl:message name="SearchLogSoapIn"/>
+  <wsdl:message name="SearchLogSoapOut">
+    <wsdl:part name="SearchLogResult" type="s:string"/>
+  </wsdl:message>
+  <wsdl:portType name="WebServerSoap">
+    <wsdl:operation name="FileSave">
+      <wsdl:input message="tns:FileSaveSoapIn"/>
+      <wsdl:output message="tns:FileSaveSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateFile">
+      <wsdl:input message="tns:UpdateFileSoapIn"/>
+      <wsdl:output message="tns:UpdateFileSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFile">
+      <wsdl:input message="tns:DeleteFileSoapIn"/>
+      <wsdl:output message="tns:DeleteFileSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="FileRangeSave">
+      <wsdl:input message="tns:FileRangeSaveSoapIn"/>
+      <wsdl:output message="tns:FileRangeSaveSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="AddUser">
+      <wsdl:input message="tns:AddUserSoapIn"/>
+      <wsdl:output message="tns:AddUserSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUser">
+      <wsdl:input message="tns:UpdateUserSoapIn"/>
+      <wsdl:output message="tns:UpdateUserSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteUser">
+      <wsdl:input message="tns:DeleteUserSoapIn"/>
+      <wsdl:output message="tns:DeleteUserSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="AddDeptIn">
+      <wsdl:input message="tns:AddDeptInSoapIn"/>
+      <wsdl:output message="tns:AddDeptInSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateDeptIn">
+      <wsdl:input message="tns:UpdateDeptInSoapIn"/>
+      <wsdl:output message="tns:UpdateDeptInSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDeptIn">
+      <wsdl:input message="tns:DeleteDeptInSoapIn"/>
+      <wsdl:output message="tns:DeleteDeptInSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="FileInBoxSave">
+      <wsdl:input message="tns:FileInBoxSaveSoapIn"/>
+      <wsdl:output message="tns:FileInBoxSaveSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteInBoxFile">
+      <wsdl:input message="tns:DeleteInBoxFileSoapIn"/>
+      <wsdl:output message="tns:DeleteInBoxFileSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SearchWaitQFile">
+      <wsdl:input message="tns:SearchWaitQFileSoapIn"/>
+      <wsdl:output message="tns:SearchWaitQFileSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SearchEmerg">
+      <wsdl:input message="tns:SearchEmergSoapIn"/>
+      <wsdl:output message="tns:SearchEmergSoapOut"/>
+    </wsdl:operation>
+    <wsdl:operation name="SearchLog">
+      <wsdl:input message="tns:SearchLogSoapIn"/>
+      <wsdl:output message="tns:SearchLogSoapOut"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WebServerSoap" type="tns:WebServerSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="FileSave">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateFile">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFile">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FileRangeSave">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddUser">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUser">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteUser">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddDeptIn">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateDeptIn">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDeptIn">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FileInBoxSave">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteInBoxFile">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchWaitQFile">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchEmerg">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SearchLog">
+      <soap:operation soapAction="" style="rpc"/>
+      <wsdl:input>
+        <soap:body use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="encoded" namespace="http://www.dfky.com.cn/" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WebServer">
+    <wsdl:port name="WebServerSoap" binding="tns:WebServerSoap">
+      <soap:address location="http://192.168.1.100/websj/webservice/webserver.asmx"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

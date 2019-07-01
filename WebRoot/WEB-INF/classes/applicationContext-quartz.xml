@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"    
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"    
+    xmlns:context="http://www.springframework.org/schema/context"  xmlns:mvc="http://www.springframework.org/schema/mvc"    
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.2.xsd     
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd    
+           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">  
+     
+    <!-- 配置定时器执行类 -->
+	<bean id="finishQuqrtz" class="com.capinfo.schedule.service.impl.FinishQuqrtz"/>
+	
+	<!-- 将 执行类 配置到job中，同时配置执行任务的方法 -->
+	<bean id="finishQuqrtzJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="finishQuqrtz"/><!-- 执行任务的类 -->
+		<property name="targetMethod" value="autoFinish"/><!-- 执行任务的方法 -->
+		<!-- concurrent设为false，多个job不会并发运行 -->
+		<property name="concurrent" value="false"/>
+	</bean>
+	
+	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="finishQuqrtzJob"/>
+		<!-- 配置默认执行时间(每天凌晨1点执行) -->
+		<property name="cronExpression">
+		    <value>0 0 1 * * ?</value>
+		</property>
+	</bean>
+	
+    <!-- 配置spring响应触发器的入口  lazy-init设置为false时，程序启动立即执行任务 -->
+    <bean id="schedulerFactory" lazy-init="false" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+         <property name="triggers">
+             <list>
+                 <ref local="cronTrigger"/>
+             </list>
+         </property>
+    </bean>
+    
+</beans>  

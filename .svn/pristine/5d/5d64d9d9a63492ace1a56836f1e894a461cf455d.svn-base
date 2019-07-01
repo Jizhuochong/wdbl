@@ -1,0 +1,21 @@
+package com.capinfo.wdbl.service;
+
+import java.io.File;
+
+/**
+ * 文件导出服务接口
+ *
+ */
+public interface FileRegExportService {
+
+	/**
+	 * 获取生成的Word导出文件
+	 * @param docTypeVal
+	 * @param id
+	 * @return
+	 */
+	public File getGenerateExportFile(int docTypeVal, Long id);
+	
+	public File getGeneratePhoneRecordExportFile(int docTypeVal, Long id);
+
+}

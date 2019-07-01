@@ -1,0 +1,324 @@
+package com.capinfo.wdbl.action;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.capinfo.base.service.BaseService;
+import com.capinfo.security.bean.User;
+import com.capinfo.security.userdetails.UserDetails;
+import com.capinfo.security.userdetails.UserDetailsHelper;
+import com.capinfo.util.PageBean;
+import com.capinfo.wdbl.api.FileManager;
+import com.capinfo.wdbl.api.SerialNumberManager;
+import com.capinfo.wdbl.bean.FileReg;
+import com.capinfo.wdbl.bean.OriginalFile;
+import com.capinfo.wdbl.enums.DocType;
+import com.capinfo.wdbl.service.FileRegService;
+import com.capinfo.wdbl.util.ConstantInfo;
+import com.capinfo.wdbl.util.FileValidationUtils;
+import com.capinfo.wdbl.util.FormLoadJsonBean;
+import com.capinfo.wdbl.util.GridJsonBean;
+import com.capinfo.wdbl.util.SaveJsonBean;
+
+/**
+ * [文件登记Controller]
+ * 
+ */
+@Controller
+@RequestMapping("file_reg")
+public class FileRegController {
+
+	private static final Log log = LogFactory.getLog(FileRegController.class);
+	@Autowired
+	@Qualifier("baseService")
+	private BaseService service;
+	@Autowired
+	private FileRegService fileRegService;
+	@Autowired
+	private FileManager fileManager;
+	@Autowired
+	private SerialNumberManager serialNumberManager;
+	@Autowired
+	private FileValidationUtils validationUtils;
+
+	/**
+	 * 跳转到展示文件登记列表页面
+	 * 
+	 * @param docTypeName
+	 * 
+	 * @return
+	 */
+	@RequestMapping("/{docTypeName}/toList.do")
+	public String showDocList(@PathVariable String docTypeName) {
+		log.debug(String.format("show %s list invoked",
+				docTypeName.replace("_", " ")));
+		return String.format("file_reg/%s", docTypeName);
+	}
+
+	@RequestMapping(value = "/{docTypeName}/listLoad.do", method = RequestMethod.POST)
+	public @ResponseBody
+	GridJsonBean loadListData(@PathVariable String docTypeName,
+			@RequestParam Integer start, @RequestParam Integer limit,
+			@RequestParam(value = "sort", required = false) String sort,
+			@RequestParam(value = "dir", required = false) String dir, FileReg fr) {
+		log.debug(String.format("load %s list data invoked", docTypeName.replace("_", " ")));
+		GridJsonBean rs = null;
+		PageBean p = null;
+		List<Criterion> conditions = new ArrayList<Criterion>();
+		try {
+			int docTypeVal = DocType.valueOf(docTypeName.toUpperCase()).ordinal()+1;
+			if(StringUtils.isEmpty(sort) || StringUtils.isEmpty(dir)){
+				sort = "receiveTime";
+				dir = "desc";
+			}
+			conditions.add(Restrictions.eq("docType", String.valueOf(docTypeVal)));//文件类型
+			if(!StringUtils.isEmpty(fr.getTitle())){
+				conditions.add(Restrictions.like("title",  new StringBuilder("%").append(fr.getTitle().trim()).append("%").toString() ) );//标题
+			}
+			rs = new GridJsonBean(service.findByPage((p = new PageBean(start, limit)), new FileReg(), sort, dir, conditions.toArray(new Criterion[] {})), p.getTotal());
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage(), e);
+		}
+		return rs;
+	}
+
+	/**
+	 * 保存添加文件登记信息
+	 * 
+	 * @param docTypeName
+	 * @param fileReg
+	 * @return
+	 */
+	@RequestMapping(value = "/{docTypeName}/addSave.do", method = RequestMethod.POST)
+	public @ResponseBody
+	SaveJsonBean addSave(@PathVariable String docTypeName, FileReg fileReg,
+			@RequestParam(value="files",required=false) MultipartFile[] files) {
+		log.debug(String.format("add %s fileReg invoked", docTypeName.replace("_", " ")));
+		try {
+			User user = UserDetailsHelper.getUser();
+			DocType docType = DocType.valueOf(docTypeName.toUpperCase());
+			int docTypeVal = docType.ordinal()+1;
+			fileReg.setSn(serialNumberManager.generateSN());
+			fileReg.setDocType(String.valueOf(docTypeVal));
+			fileReg.setRegisterTime(new Date());
+			fileReg.setRegistrar(user.getName());
+			fileReg.setHandlestatus("登记");
+			List<OriginalFile> originalFiles = new ArrayList<OriginalFile>();
+			for (int i = 0; i < files.length; i++) {
+				MultipartFile file =  files[i];
+				if(file.getSize()>0){
+					Assert.isTrue(validationUtils.isAcceptType(file), validationUtils.getAcceptTypeErrorMsg());//校验上传文件类型
+					OriginalFile oFile = new OriginalFile();
+					oFile.setFileName(file.getOriginalFilename());
+					oFile.setFileSize(file.getBytes().length);
+					oFile.setFileSuffix(FilenameUtils.getExtension(file.getOriginalFilename()));
+					oFile.setFilePath(fileManager.saveDocOriginalFile(file, docType));
+					oFile.setCreateTime(new Date());
+					oFile.setOrdinal(i);
+					oFile.setFileReg(fileReg);
+					originalFiles.add(oFile);	
+				}
+			}
+			
+			fileReg.setOriginalFiles(originalFiles);
+		} catch (IllegalArgumentException iae) {
+			return new SaveJsonBean(false, iae.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage(), e);
+		}
+
+		return new SaveJsonBean(false, ConstantInfo.saveErrorMsg);
+	}
+
+	/**
+	 * 加载文件登记信息
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = "/{docTypeName}/loadBean.do", method = RequestMethod.POST)
+	public @ResponseBody
+	FormLoadJsonBean<FileReg> loadBean(@PathVariable String docTypeName, @RequestParam(value = "id", required = true) Long id) {
+		log.debug(String.format("load %s fileReg invoked", docTypeName.replace("_", " ")));
+		FormLoadJsonBean<FileReg> result = new FormLoadJsonBean<FileReg>();
+		try {
+			FileReg bean = service.getObject(FileReg.class, id);
+			result.setSuccess(true);
+			result.setData(bean);
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage(), e);
+			result.setSuccess(false);
+		}
+		return result;
+	}
+
+	/**
+	 * 保存修改文件登记信息
+	 * 
+	 * @param docTypeName
+	 * @param fileReg
+	 * @return
+	 */
+	@RequestMapping(value = "/{docTypeName}/editSave.do", method = RequestMethod.POST)
+	public @ResponseBody
+	SaveJsonBean editSave(@PathVariable String docTypeName, FileReg fileReg,
+			@RequestParam(value="fileIds",required=false) Long[] fileIds,
+			@RequestParam(value="files",required=false) MultipartFile[] files) {
+		log.debug(String.format("edit %s fileReg invoked", docTypeName.replace("_", " ")));
+		try {
+			DocType docType = DocType.valueOf(docTypeName.toUpperCase());
+			FileReg reg = service.getObjectWithProperties(FileReg.class, fileReg.getId(),"originalFiles");
+			Assert.notNull(reg, "未找到文件注册信息");
+			if(reg != null){
+				/*0.校验上传文件类型*/
+				if(!ArrayUtils.isEmpty(files)){
+					for (MultipartFile file : files) {
+						if(file.getSize()>0){
+							Assert.isTrue(validationUtils.isAcceptType(file), validationUtils.getAcceptTypeErrorMsg());
+						}
+					}
+				}
+				List<OriginalFile> originalFiles = new ArrayList<OriginalFile>();;
+				/*1.处理原有文件*/
+				if(!reg.getOriginalFiles().isEmpty()){
+					for(OriginalFile o:reg.getOriginalFiles()){
+						if(fileIds!=null && fileIds.length>0){
+							if(ArrayUtils.contains(fileIds, o.getId())){
+								OriginalFile oFile = new OriginalFile();
+								oFile.setFileName(o.getFileName());
+								oFile.setFileSize(o.getFileSize());
+								oFile.setFileSuffix(o.getFileSuffix());
+								oFile.setFilePath(o.getFilePath());
+								oFile.setCreateTime(o.getCreateTime());
+								oFile.setOrdinal(originalFiles.size());
+								oFile.setFileReg(reg);
+								originalFiles.add(oFile);
+							}else{//删除原文件
+								fileManager.removeDocOriginalFile(o.getFilePath());
+							}
+						}else{//删除原文件
+							fileManager.removeDocOriginalFile(o.getFilePath());
+						}
+					}
+				}
+				/*2.处理新增文件*/
+				if(!ArrayUtils.isEmpty(files)){
+					for (MultipartFile file : files) {
+						if(file.getSize()>0){
+							OriginalFile oFile = new OriginalFile();
+							oFile.setFileName(file.getOriginalFilename());
+							oFile.setFileSize(file.getBytes().length);
+							oFile.setFileSuffix(FilenameUtils.getExtension(file.getOriginalFilename()));
+							oFile.setFilePath(fileManager.saveDocOriginalFile(file, docType));
+							oFile.setCreateTime(new Date());
+							oFile.setOrdinal(originalFiles.size());
+							oFile.setFileReg(reg);
+							originalFiles.add(oFile);
+						}
+					}
+				}
+				fileReg.setOriginalFiles(originalFiles);
+				fileRegService.updateFileReg(fileReg);
+				return new SaveJsonBean(true, ConstantInfo.saveSuccessMsg);
+			}
+		
+		} catch (IllegalArgumentException iae) {
+			return new SaveJsonBean(false, iae.getMessage());
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage(), e);
+		}
+
+		return new SaveJsonBean(false, ConstantInfo.saveErrorMsg);
+	}
+
+	/**
+	 * 删除文件登记信息
+	 * 
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping(value = "/{docTypeName}/delete.do", method = RequestMethod.POST)
+	public @ResponseBody
+	SaveJsonBean delete(@PathVariable String docTypeName, Long[] ids) {
+		log.debug(String.format("delete %s fileReg invoked", docTypeName.replace("_", " ")));
+		SaveJsonBean result = new SaveJsonBean();
+		try {
+			if (ids != null && ids.length > 0) {
+				fileRegService.deleteFileReg(ids);
+				result.setSuccess(true);
+				result.setMsg(ConstantInfo.delSuccessMsg);
+			} else {
+				result.setSuccess(true);
+				result.setMsg(ConstantInfo.noCheckedMsg);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.error(e.getMessage(), e);
+			result.setSuccess(false);
+			result.setMsg(ConstantInfo.delErrorMsg);
+		}
+		return result;
+	}
+	
+	/**
+	 * 上传文件
+	 * 
+	 * @param id
+	 * @return
+	 * @throws IOException 
+	 */
+	@RequestMapping(value = "/upload.do")
+	public @ResponseBody SaveJsonBean updload(Long id,@RequestParam MultipartFile file) throws IOException {
+		if(file.getSize()>0){
+			OriginalFile oFile = new OriginalFile();
+			oFile.setFileName(file.getOriginalFilename());
+			oFile.setFileSize(file.getBytes().length);
+			oFile.setFileSuffix(FilenameUtils.getExtension(file.getOriginalFilename()));
+			oFile.setFilePath(fileManager.saveDocOriginalFile(file, DocType.OTHER_DOC));
+			oFile.setCreateTime(new Date());
+		}
+		return new SaveJsonBean(true, ConstantInfo.saveSuccessMsg);
+	
+	}
+	
+	/**
+	 * 删除文件登记信息
+	 * 
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping(value = "/test.do", method = RequestMethod.POST)
+	public @ResponseBody
+	SaveJsonBean test(String username) {
+		SaveJsonBean result = new SaveJsonBean();
+		System.out.println("from client : "+username);
+		result.setMsg(ConstantInfo.saveSuccessMsg);
+		return result;
+	}
+}

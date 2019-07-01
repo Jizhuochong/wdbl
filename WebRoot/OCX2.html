@@ -1,0 +1,50 @@
+<HTML>
+<HEAD>
+<META NAME="GENERATOR" Content="Microsoft Visual Studio 6.0">
+<TITLE></TITLE>
+
+
+</HEAD>
+<BODY>
+<P>
+分类名 <input id = "ClassName" type = "text" value = "" />
+图像路径 <input id = "FilePath" type = "text" value = "image" />
+<INPUT id=OpenTask type=button value=打开扫描任务 name=OpenTask/>
+<INPUT id=ScanResult type=button value=扫描结果 name=ScanResult/>
+</p>
+<P>
+<div align="center">
+<OBJECT id=dwz width="70%" height="700"  classid=clsid:2C52AFEA-97D7-4CD8-BCEB-6CF03F0A31E3>
+</div>
+<PARAM NAME="_Version" VALUE="65536">
+<PARAM NAME="_ExtentX" VALUE="2646">
+<PARAM NAME="_ExtentY" VALUE="1323">
+<PARAM NAME="_StockProps" VALUE="0">
+<PARAM NAME="VISABLE" VALUE="FALSE">
+</OBJECT>
+
+</P>
+
+
+<SCRIPT ID=clientEventHandlersVBS LANGUAGE=vbscript>
+Sub OpenTask_onclick
+	dim ClassName
+	ClassName = document.getElementById("ClassName").value
+	dim Path
+	Path = document.getElementById("FilePath").value
+	dim nRet
+	nRet = dwz.OpenScanTask("", "")
+	
+End Sub
+
+
+Sub ScanResult_onclick
+	//dwz.SetSelectImageProPerty dwz.GetCurrentSelectImagePath ,"3","3","3","3"
+	//dim sResult
+	//sResult=dwz.GetCurSelectImageProperty(dwz.GetCurrentSelectImagePath)
+	//alert(sResult)
+	dwz.SetButtonStat"适合大小(编辑)","0"
+End Sub
+</script>
+</BODY>
+</HTML>

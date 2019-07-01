@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>TEST_OCX</title>
+</head>
+
+<body> 
+檔案名稱開頭:<input id = "filenameStart" name = "filenameStart" type = "text" value = "fp"  style="width:100px;"/><br><P>
+檔案名稱編號長度:<input id = "filenameLenth" name = "filenameLenth" type = "text" value = "6" maxlength="1" style="width:35px;" />�?
+檔案名稱起始編號:<input id = "filenameindex" name = "filenameindex" type = "text" value = "0" maxlength="3" style="width:35px;" />
+  <input align="left" id="ModifyData" name="ModifyData" type="button" value="修改檔案名稱參數" onclick="modifydata()" disabled="disabled"/>
+<br><P>
+圖像儲存路徑: 
+<input id = "FilePath" name = "FilePath" type = "text" value = "image" />
+<br>
+<P>
+  <input align="left" id="OpenTask" type="button" value="開啟掃描介面" onclick="OpenTask()"/>
+<P>
+  <input id="ScanResult" name="ScanResult" type="button" value="掃描成功列表" onclick="ScanResult()" disabled="disabled"/>
+ <textarea id = "ClassName" name = "ClassName" style="width:300px; height:150px;" readonly="readonly" />
+</textarea>
+
+<P>
+  <object id=dwz width="100%" height="580" classid="clsid:2C52AFEA-97D7-4CD8-BCEB-6CF03F0A31E3" >
+    <param name="_Version" value="65536" />
+    <param name="_ExtentX" value="2646" />
+    <param name="_ExtentY" value="1323" />
+    <param name="_StockProps" value="0" />
+    <param name="VISABLE" value="FALSE" />
+  </object>
+</P>
+<script type="text/javascript">
+String.prototype.trim=trim;
+function trim() 
+{
+   return this.replace(/^\s+|\s+$/g, "");
+}
+function IsNumber(StringNO)
+{
+	 var NumberRule = /^([0-9])*$/;
+	 StringTemp = document.getElementById(StringNO).value
+	 
+	 var matchArray = StringTemp.match(NumberRule);  
+	 if (matchArray ==null){
+		 alert("Numbers only");
+		
+		 if (StringNO == "filenameLenth"){
+			 document.getElementById(StringNO).value ="6";
+		 } else {
+			 document.getElementById(StringNO).value ="0";
+			 }
+			 return false ;
+	 }
+return true;
+} 
+
+function OpenTask()
+{
+	var classname = document.getElementById("ClassName").value;
+	var filepath  = document.getElementById("FilePath").value;
+	    filepath= filepath.trim(filepath);
+		
+	var fileFrontName  = document.getElementById("filenameStart").value;
+		fileFrontName= fileFrontName.trim(fileFrontName);
+		
+	var fileLenth  = document.getElementById("filenameLenth").value;
+		fileLenth= fileLenth.trim(fileLenth);
+		if (!IsNumber("filenameLenth")){
+			return false;
+			}
+	var fileIndex  = document.getElementById("filenameindex").value;		
+		fileIndex= fileIndex.trim(fileIndex);
+		if (!IsNumber("filenameindex")){
+			return false;
+			}
+		
+		var nRet = dwz.OpenScanTask(classname ,filepath);
+		dwz.ImageFrontName=fileFrontName;
+		dwz.ImageNameLenth=fileLenth;
+		dwz.ImageStartIndex=fileIndex;
+		document.getElementById("ScanResult").disabled = false;
+		document.getElementById("ModifyData").disabled = false;
+}
+function ScanResult()
+{
+
+	var nRet = dwz.GetScanResult();
+	if(nRet==""){
+		alert("No any data");
+	} else {
+			var nRetTemp = nRet.split("|");
+			var nRetString ="";
+			for (var i =0; i < nRetTemp.length;i++ )
+			{
+				nRetString = nRetString+nRetTemp[i]+"\n";
+			}
+	document.getElementById("ClassName").value=nRetString;
+	}
+}
+function modifydata()
+{
+	var fileFrontName  = document.getElementById("filenameStart").value;
+		fileFrontName= fileFrontName.trim(fileFrontName);
+		
+	var fileLenth  = document.getElementById("filenameLenth").value;
+		fileLenth= fileLenth.trim(fileLenth);
+		if (!IsNumber("filenameLenth")){
+			return false;
+			}
+	var fileIndex  = document.getElementById("filenameindex").value;		
+		fileIndex= fileIndex.trim(fileIndex);
+		if (!IsNumber("filenameindex")){
+			return false;
+			}
+		dwz.ImageFrontName=fileFrontName;
+		dwz.ImageNameLenth=fileLenth;
+		dwz.ImageStartIndex=fileIndex;
+			
+}
+
+
+</script>
+
+</body>
+</html>

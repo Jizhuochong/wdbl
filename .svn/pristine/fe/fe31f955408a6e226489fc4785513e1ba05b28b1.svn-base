@@ -1,0 +1,10 @@
+package com.capinfo.wdbl.dao;
+
+import com.capinfo.wdbl.bean.file_process.File_Handle;
+import com.googlecode.genericdao.dao.hibernate.GenericDAO;
+
+public interface FileHandleDao  extends GenericDAO {
+	
+	public File_Handle getLastHandle(Long id);
+	
+}

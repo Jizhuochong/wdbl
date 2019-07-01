@@ -1,0 +1,628 @@
+//局长批示件
+var cs = null;
+var dyspd = null;
+var leaderInstructions = null;
+var transfer = null;
+var finish = null;
+var noFinish = null;
+Ext.define('Wdbl.form.InstructionsEditForm', {
+	extend : 'Wdbl.form.BaseEditForm',
+	requires : ['Ext.form.FieldSet', 'Ext.form.FieldContainer', 'Ext.form.field.File', 'Ext.form.Label'],
+	instructionsBtn : null,
+	transferBtn : null,
+	dispatchBtn : null,
+	endingBtn : null,
+	modelId : null,
+	/**
+	 * 分发单位按钮组
+	 * 
+	 * @type Ext.grid.Panel
+	 */
+	fenfaBtn : null,
+	/**
+	 * 登记按钮组
+	 * 
+	 * @type Ext.grid.Panel
+	 */
+	newBtns : null,
+	/**
+	 * 办理按钮组
+	 * 
+	 * @type Ext.grid.Panel
+	 */
+	processBtns : null,
+	/////function//////
+	addSave : function() {
+		var me = this;
+		var add = 'reg_file/addSave.do';
+		var load = 'reg_file/loadBean.do';
+		var edit = 'reg_file/editSave.do';
+		var del = 'reg_file/delete.do';
+		var toSend = 'reg_file/toSend.do';
+		var urladdress = null;
+		if(me.addType=="newAdd" || me.addType=="newEdit")
+		{
+			urladdress = me.parent.api.add;
+		}
+		if(me.addType=="process")
+		{
+			urladdress = add;
+		}
+		me.getForm().submit({
+			waitTitle : "请稍候",
+			waitMsg : "正在提交表单数据，请稍候",
+			url : urladdress,
+			params:{docTypeName:'CHIEF_APRV_DOC',sessionID:me.id},
+			method : "POST",
+			success : function(form, action) {
+				me.modelId = action.result.data.id;
+				cs.setDisabled(false);
+				dyspd.setDisabled(false);
+				leaderInstructions.setDisabled(false);
+				transfer.setDisabled(false);
+				finish.setDisabled(false);
+				me.addType = "newEdit";
+				me.loadParam = {'id' : me.modelId},
+				me.load = true;
+				me.loadData();
+				Ext.Msg.alert("提示", action.result.msg);
+			},
+			failure : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			}
+		});
+	},
+	/**
+	 * 修改保存
+	 */
+	editSave : function() {
+		var me = this;
+		var add = 'reg_file/addSave.do';
+		var load = 'reg_file/loadBean.do';
+		var edit = 'reg_file/editSave.do';
+		var del = 'reg_file/delete.do';
+		var toSend = 'reg_file/toSend.do';
+		var urladdress = null;
+		if(me.addType=="newAdd" || me.addType=="newEdit")
+		{
+			urladdress = me.parent.api.edit;
+		}
+		if(me.addType=="process")
+		{
+			urladdress = edit;
+		}
+		me.getForm().submit({
+			waitTitle : "请稍候",
+			waitMsg : "正在提交表单数据，请稍候",
+			url : urladdress,
+			params:{docTypeName:'CHIEF_APRV_DOC',sessionID:me.id},
+			method : "POST",
+			success : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			},
+			failure : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			}
+		});
+	},
+	// 打印审批单
+	f_print : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var _url = 'file_export/CITY_GOV_DOC/' + me.modelId + '/export.do';
+			window.open(_url);
+		}
+		if(me.addType=="newEdit"){
+			var _url = 'file_export/CITY_GOV_DOC/' + me.loadParam.id + '/export.do';
+			window.open(_url);
+		}
+		if(me.addType=="process"){
+			var _url = 'file_export/CITY_GOV_DOC/' + me.loadParam.id + '/export.do';
+			window.open(_url);
+		}
+	},
+	// 拟办
+	f_draft : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var process_common = Ext.create('Wdbl.form.op.draftForm',{recordID:me.modelId,store:me.parent.innerGrid.store, gridpanel:me.parent.innerGrid});
+			process_common.showWin();
+			return;
+		}
+		if(me.addType=="newEdit"){
+			var process_common = Ext.create('Wdbl.form.op.draftForm',{recordID:me.loadParam.id, store:me.parent.innerGrid.store, gridpanel:me.parent.innerGrid});
+			process_common.showWin();
+		}
+	},
+	// 录入领导批示
+	f_leaderInstructions : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var process_common = Ext.create('Wdbl.form.op.leaderInstructionsForm',{recordID:me.modelId});
+			process_common.showWin();
+		}
+		if(me.addType=="newEdit"){
+			var process_common = Ext.create('Wdbl.form.op.leaderInstructionsForm',{recordID:me.loadParam.id});
+			process_common.showWin();
+		}
+		if(me.addType=="process"){
+			var process_common = Ext.create('Wdbl.form.op.leaderInstructionsForm',{recordID:me.loadParam.id});
+			process_common.showWin();
+		}
+	},
+	// 转送单位
+	f_transfer : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var process_common = Ext.create('Wdbl.form.op.transferForm',{recordID:me.modelId});
+			process_common.showWin();
+		}
+		if(me.addType=="newEdit"){
+			var process_common = Ext.create('Wdbl.form.op.transferForm',{recordID:me.loadParam.id});
+			process_common.showWin();
+		}
+		if(me.addType=="process"){
+			var process_common = Ext.create('Wdbl.form.op.transferForm',{recordID:me.loadParam.id});
+			process_common.showWin();
+		}
+	},
+	// 办结
+	f_finish : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var ids = [];
+			ids.push(me.modelId);
+		}
+		if(me.addType=="newEdit"){
+			var ids = [];
+			ids.push(me.loadParam.id);
+		}
+		if(me.addType=="process"){
+			var ids = [];
+			ids.push(me.loadParam.id);
+		}
+		me.getForm().submit({
+			waitTitle : "请稍候",
+			waitMsg : "正在提交表单数据，请稍候",
+			url : 'reg_file/finish.do',
+			params:{ids : ids},
+			method : "POST",
+			success : function(form, action) {
+				cs.setDisabled(true);
+				dyspd.setDisabled(true);
+				leaderInstructions.setDisabled(true);
+				transfer.setDisabled(true);
+				finish.setDisabled(true);
+				noFinish.setDisabled(false);
+				Ext.Msg.alert("提示", action.result.msg);
+				 me.close();
+			},
+			failure : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			}
+		});
+	},
+	// 取消办结
+	f_noFinish : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var ids = [];
+			ids.push(me.modelId);
+		}
+		if(me.addType=="newEdit"){
+			var ids = [];
+			ids.push(me.loadParam.id);
+		}
+		if(me.addType=="process"){
+			var ids = [];
+			ids.push(me.loadParam.id);
+		}
+		me.getForm().submit({
+			waitTitle : "请稍候",
+			waitMsg : "正在提交表单数据，请稍候",
+			url : 'reg_file/noFinish.do',
+			params:{ids : ids},
+			method : "POST",
+			success : function(form, action) {
+				cs.setDisabled(false);
+				dyspd.setDisabled(false);
+				leaderInstructions.setDisabled(false);
+				transfer.setDisabled(false);
+				finish.setDisabled(false);
+				noFinish.setDisabled(true);
+				Ext.Msg.alert("提示", action.result.msg);
+			},
+			failure : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			}
+		});
+	},
+	// 是否显示按钮
+	f_isShowBtn : function() {
+		var me = this;
+		Ext.Ajax.request({
+			url : 'reg_file/isShowBtn.do',
+			method : "post",
+			params : {ids : me.loadParam.id},
+			scope : this,
+			success : function(response, opts) {
+				var json = Ext.JSON.decode(response.responseText);
+				if(json.msg == "1")
+				{
+					cs.setDisabled(true);
+					dyspd.setDisabled(true);
+					leaderInstructions.setDisabled(true);
+					transfer.setDisabled(true);
+					finish.setDisabled(true);
+					noFinish.setDisabled(false);
+					return;
+				}
+				noFinish.setDisabled(true);
+			},
+			failure : function() {
+				Ext.Msg.alert('系统提示',json.msg);
+			}
+		}, this);
+	},
+	// 呈送
+	f_submit : function() {
+		var me = this;
+		if(me.addType=="newAdd"){
+			var process_common = Ext.create('Wdbl.form.op.submitForm',{parent:me,recordID:me.modelId,store:me.parent.innerGrid.store, gridpanel:me.parent.innerGrid});
+			process_common.showWin();
+			return;
+		}
+		if(me.addType=="newEdit"){
+			var process_common = Ext.create('Wdbl.form.op.submitForm',{parent:me,recordID:me.loadParam.id, store:me.parent.innerGrid.store, gridpanel:me.parent.innerGrid});
+			process_common.showWin();
+			return;
+		}
+		if(me.addType=="process"){
+			var process_common = Ext.create('Wdbl.form.op.submitForm',{recordID:me.loadParam.id});
+			process_common.showWin();
+			return;
+		}
+	},
+	initComponent : function() {
+		var me = this;
+		me.fileContainer = Ext.create('Wdbl.form.op.FileList', {label:'附件',formObj:me});
+		cs = Ext.create('Ext.button.Button',{
+			text : '呈送',
+			disabled : true,
+			handler : function(){me.f_submit()},
+			listeners: {
+	            'beforerender': function(){
+	            	if(me.addType == 'newEdit' ){
+	            		this.setDisabled(false);
+	            	}
+	            	if(me.addType == 'process' ){
+	            		this.hide();
+	            	}
+                }
+	      	}
+		});
+		leaderInstructions = Ext.create('Ext.button.Button',{
+			text : '录入领导批示',
+			disabled : true,
+			handler : function(){me.f_leaderInstructions()},
+			listeners: {
+	            'beforerender': function(){
+					if(me.addType == 'newEdit' ){
+	            		this.setDisabled(false);
+	            	}
+	            	if(me.addType == 'process' ){
+	            		this.hide();
+	            	}
+                }
+	      	}
+		});
+		transfer = Ext.create('Ext.button.Button',{
+			text : '文件处理',
+			disabled : true,
+			handler : function(){me.f_transfer()},
+			listeners: {
+	            'beforerender': function(){
+					if(me.addType == 'newEdit' ){
+	            		this.setDisabled(false);
+	            	}
+	            	if(me.addType == 'process' ){
+	            		this.hide();
+	            	}
+                }
+	      	}
+		});
+		finish = Ext.create('Ext.button.Button',{
+			text : '办结',
+			disabled : true,
+			handler : function(){me.f_finish()},
+			listeners: {
+	            'beforerender': function(){
+					if(me.addType == 'newEdit' ){
+	            		this.setDisabled(false);
+	            	}
+	            	if(me.addType == 'process' ){
+	            		this.hide();
+	            	}
+                }
+	      	}
+		});
+		noFinish = Ext.create('Ext.button.Button',{
+			text : '取消办结',
+			disabled : true,
+			handler : function(){me.f_noFinish()},
+			listeners: {
+	            'beforerender': function(){
+					if(me.addType == 'newEdit' ){
+	            		this.setDisabled(false);
+	            	}
+	            	if(me.addType == 'process' ){
+	            		this.hide();
+	            	}
+                }
+	      	}
+		});
+		dyspd = Ext.create('Ext.button.Button',{
+			text : '打印审批单',
+			disabled : true,
+			handler : function(){me.f_print()},
+			listeners: {
+	            'beforerender': function(){
+	            	if(me.addType == 'newEdit' ){
+	            		this.setDisabled(false);
+	            	}
+	            	if(me.addType == 'process' ){
+	            		this.hide();
+	            	}
+                }
+	      	}
+		});
+		Ext.applyIf(me, {
+			items : [{
+				xtype : "hidden",
+				name : "id"
+			}, {
+				xtype : "fieldset",
+				title : '局长批示件',
+				items : [{
+						xtype : "textarea",
+						fieldLabel : "文件标题",
+						name : "title",
+						labelWidth:60,
+						padding: '0 0 0 5',
+						rows : 2,
+						anchor : '100%'
+					},{
+					xtype : "fieldcontainer",
+					layout : 'column',
+					items : [Ext.create('Ext.form.ComboBox',{
+						fieldLabel : "文件类型",
+						labelWidth:60,
+						padding: '0 0 0 5',
+						columnWidth : 0.25,
+						store : getComboDataStore('wjlx'),
+						displayField : 'node',
+						valueField : 'code',
+						emptyText:'请选择',
+						value: '5',
+						hidden: true
+					}),{
+						xtype : "combo",
+						columnWidth : 0.25,
+						fieldLabel : "来文单位",
+						labelWidth: 60,
+						padding: '0 0 0 5',
+						name : "formUnit",
+						store : getComboDataStore('lwdw'),
+						displayField : 'node',
+						valueField : 'code',
+						mode : 'remote'
+					},{
+						columnWidth : 0.25,
+						labelWidth:60,
+						padding: '0 0 0 5',
+						xtype : "textfield",
+						fieldLabel : "文号",
+						name : "docNumber",
+						value:"﹝﹞",
+						maxLength : 30
+					},Ext.create('Ext.ux.datetime.DateTimeField', {
+						fieldLabel : "来文时间",
+						columnWidth : 0.25,
+						labelWidth:60,
+						padding: '0 0 0 5',
+						value: new Date(),
+						name : "receiveTime"
+					}),Ext.create('Ext.ux.datetime.DateTimeField', {
+						columnWidth : 0.25,
+						labelWidth:60,
+						padding: '0 0 0 5',
+						fieldLabel : "完成期限",
+						format: 'Y-m-d H:i',
+						name : "deadline"
+					})]
+				},{
+					xtype : "fieldcontainer",
+					layout : 'column',
+					items : [{
+						xtype : "hidden",
+						name : "id"
+					},{
+						columnWidth : 0.25,
+						labelWidth:60,
+						padding: '0 0 0 5',
+						xtype : "combo",
+						fieldLabel : "密级",
+						name : "securityGrade",
+						store : getComboDataStore('mj'),
+						displayField : 'node',
+						valueField : 'code',
+						mode : 'remote'
+					},{
+						columnWidth : 0.25,
+						labelWidth:60,
+						padding: '0 0 0 5',
+						xtype : "combo",
+						fieldLabel : "紧急程度",
+						name : "urgencyDegree",
+						store : getComboDataStore('jjcd'),
+						displayField : 'node',
+						valueField : 'code',
+						mode : 'remote'
+					},{
+						columnWidth : 0.25,
+						xtype : "numberfield",
+						fieldLabel : "份数",
+						labelWidth:60,
+						padding: '0 0 0 5',
+						minValue:1,
+						maxValue:999999,
+						allowDecimals:false,
+						name : "copies",
+						value: 1
+					},{
+						columnWidth : 0.14,
+						labelWidth:60,
+						padding: '0 0 0 5',
+						xtype : "numberfield",
+						fieldLabel : "序号范围",
+						minValue:1,
+						maxValue:999999999,
+						allowDecimals:false,
+						index:0,
+						name : "numberRangeStart",
+						listeners:{
+							change: function(){
+								var _minValue= this.minValue;
+								var _allowBlank = true;
+								if(this.getValue()) {
+									_allowBlank = false;
+									_minValue= this.getValue();
+								}
+								Ext.apply(this.nextNode(),{allowBlank:_allowBlank,minValue : _minValue});
+								this.validate(); 
+							}
+						}
+					},{
+						columnWidth : 0.11,
+						xtype : "numberfield",
+						fieldLabel : "至",
+						labelWidth:20,
+						padding: '0 0 0 5',
+						minValue:1,
+						maxValue:999999999,
+						allowDecimals:false,
+						index:1,
+						name : "numberRangeEnd",
+						listeners:{
+							change: function(){
+								var _maxValue=this.maxValue;
+								var _allowBlank = true;
+								if(this.getValue()){
+									_allowBlank = false;
+									_maxValue= this.getValue();
+								}
+								Ext.apply(this.previousNode(),{allowBlank:_allowBlank,maxValue : _maxValue});
+								this.validate(); 
+							}
+						}
+					}]
+				}]
+			}, {
+				title : "其他信息",
+				xtype : "fieldset",
+				items : [this.fileContainer, {
+				xtype : 'panel',
+				anchor : '100%',
+				border:false,
+				buttons : [{
+					xtype : 'button',
+					text : '添加本地文件',
+					listeners : {
+						click : function() {
+							me.addFile();
+						}
+					}
+				},{
+					xtype : 'button',
+					text : '扫描',
+					listeners : {
+						click : function() {
+							me.addScan();
+						}
+					}
+				},{
+					xtype : 'button',
+					text : '拍照',
+					listeners : {
+						click : function() {
+							me.addPhoto();
+						}
+					}
+				}]
+			},{
+							xtype : "textarea",
+							fieldLabel : "关键字",
+							name : "keyword",
+							labelWidth: 60,
+							rows : 2,
+							maxLength:100,
+							anchor : '100%'
+						}, {
+							xtype : "textarea",
+							fieldLabel : "备注",
+							name : "remark",
+							labelWidth: 60,
+							rows : 2,
+							labelWidth: 60,
+							maxLength: 2000,
+							anchor : '100%'
+						}, {
+							xtype : "textarea",
+							fieldLabel : "条码信息",
+							name : "labelInfo",
+							labelWidth: 60,
+							rows : 2,
+							labelWidth: 60,
+							maxLength: 2000,
+							anchor : '100%'
+						}]
+					}],
+					buttons : [cs,dyspd,leaderInstructions,transfer,finish,noFinish,{
+						text : '保存',
+						formBind : true,
+						monitorValid : true,
+						handler : function(){
+							if(!me.load)
+								me.addSave();
+							else
+								me.editSave();
+						}
+					}, {
+						text : '关闭',
+						handler : function(){me.close()},
+						listeners: {
+				            'beforerender': function(){
+				            	if(me.addType == 'process' ){
+				            		this.hide();
+				            	}
+			                }
+				      	}
+					}],
+			listeners: {
+	            'beforerender': {
+	                fn: function(){
+						if(me.addType != 'newAdd'){
+			        		me.f_isShowBtn();
+			        	}
+	                	if (me.load){
+							me.loadData();
+						}
+	                },
+	                scope: me
+	      		}
+	      	}
+		});
+
+		me.callParent(arguments);
+	}
+});

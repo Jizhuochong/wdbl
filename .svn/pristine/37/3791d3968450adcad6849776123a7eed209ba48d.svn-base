@@ -1,0 +1,30 @@
+package com.capinfo.schedule.service;
+
+import java.util.List;
+
+import com.capinfo.schedule.bean.ScheduleConfig;
+import com.capinfo.wdbl.bean.FileReg;
+import com.googlecode.genericdao.search.ISearch;
+import com.googlecode.genericdao.search.SearchResult;
+
+public interface ScheduleService {
+	/**
+	 * 查询
+	 * @param search
+	 * @return
+	 */
+	public abstract SearchResult<ScheduleConfig> getConfigs( ISearch search);
+	
+	/**
+	 * 查询
+	 * @param search
+	 * @return
+	 */
+	public abstract List<FileReg> getAutoFinishRecords();
+	
+	/**
+	 * 更新定时任务
+	 */
+	public void updateTask();
+	
+}

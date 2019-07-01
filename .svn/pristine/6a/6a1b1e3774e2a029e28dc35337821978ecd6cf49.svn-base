@@ -1,0 +1,52 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+img/* img elements 图片元素 */{
+  border:medium none;
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+  border: 0;
+  display: block;
+}
+
+/*----------------------开始----------------------*/
+#header,.banner,#footer{
+width: 100%;
+}
+
+body{
+	width: 100%;
+	background-color: #b9d3f4;
+	font-family: :"Microsoft YaHei",微软雅黑,"MicrosoftJhengHei",华文细黑,STHeiti,MingLiu;
+	text-align: left;
+}
+
+.table{
+	margin:0px auto;
+}
+
+/*-------登录 开始-----*/
+
+.login{
+	background-color: #e0ecff;
+    margin:0 auto;
+	text-align: center;
+	vertical-align: middle;
+	background-image: url('../images/bg.jpg');
+}
+
+
+.blue_bg{
+	background-color: #e5eef7;
+    margin:0 auto;
+	text-align: left;
+	vertical-align: middle;
+	margin-top: 120px;
+	background-repeat: no-repeat;
+	border:20px #cbddf3 solid;
+}
+
+
+/*-------登录 end------------*/

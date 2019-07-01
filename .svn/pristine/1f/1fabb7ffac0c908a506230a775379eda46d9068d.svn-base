@@ -1,0 +1,41 @@
+package com.capinfo.wdbl.dao.impl;
+
+import java.util.List;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateTemplate;
+import org.springframework.stereotype.Repository;
+
+import com.capinfo.wdbl.bean.file_process.File_Handle;
+import com.capinfo.wdbl.dao.FileHandleDao;
+import com.googlecode.genericdao.dao.hibernate.GenericDAOImpl;
+
+@Repository("fileHandleDao")
+public class FileHandleDaoImpl extends GenericDAOImpl implements FileHandleDao {
+	
+	@Autowired
+	private HibernateTemplate hibernateTemplate;
+
+	@Override
+	public File_Handle getLastHandle(final Long id) {
+		HibernateCallback<Object> callback = new HibernateCallback<Object>() {
+			public Object doInHibernate(Session session) {
+				String sqlString = "FROM File_Handle FH WHERE fileReg.id = ? ORDER BY draft_date DESC";
+				Query query = session.createQuery(sqlString);
+				query.setLong(0, id);
+				query.setFirstResult(0);
+				query.setMaxResults(1);
+				return query.list();
+			}
+		};
+		List list = hibernateTemplate.executeFind(callback);
+		if (list != null && list .size() > 0)
+			return (File_Handle) list.get(0);
+		else 
+			return null;
+	}
+
+}

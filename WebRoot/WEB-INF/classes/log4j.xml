@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration debug="false"
+	xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	
+	<appender name="console" class="org.apache.log4j.ConsoleAppender">
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{z HH:mm:ss.SSS}] - %m%n" />
+		</layout>
+	</appender>
+	<!-- INFO -->
+	<appender name="info" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="D:/logs/wdbl/info" />
+		<param name="datePattern" value="'.'yyyy.MM.dd'.log'" />
+		<param name="append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{z HH:mm:ss.SSS}] %c - %l - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="levelMin" value="INFO" />
+			<param name="levelMax" value="INFO" />
+		</filter>
+	</appender>
+	<!-- WARN -->
+	<appender name="warn" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="D:/logs/wdbl/warn" />
+		<param name="datePattern" value="'.'yyyy.MM.dd'.log'" />
+		<param name="append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{z HH:mm:ss.SSS}] %c - %l - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="levelMin" value="WARN" />
+			<param name="levelMax" value="WARN" />
+		</filter>
+	</appender>
+	<!-- ERROR -->
+	<appender name="error" class="org.apache.log4j.DailyRollingFileAppender">
+		<param name="file" value="D:/logs/wdbl/error" />
+		<param name="datePattern" value="'.'yyyy.MM.dd'.log'" />
+		<param name="append" value="true" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="[%-5p] [%d{z HH:mm:ss.SSS}] %c - %l - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="levelMin" value="ERROR" />
+			<param name="levelMax" value="ERROR" />
+		</filter>
+	</appender>
+	
+	<!-- com.capinfo日志级别 -->
+	<logger name="com.capinfo">
+		<level value="DEBUG" />
+	</logger>
+	<!-- Spring 日志级别 -->
+	<logger name="org.springframework">
+		<level value="ERROR" />
+	</logger>
+	<!-- jMimemagic 日志级别 -->
+	<logger name="net.sf.jmimemagic">
+		<level value="WARN" />
+	</logger>
+	<!-- Quartz 日志级别 -->
+	<logger name="org.quartz">
+		<level value="WARN" />
+	</logger>
+	<!-- Hibernate 日志级别 -->
+	<logger name="org.hibernate">
+		<level value="WARN" />
+	</logger>
+
+	<!--
+		默认的日志级别
+	-->
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="console" />
+		<appender-ref ref="info" />
+		<appender-ref ref="warn" />
+		<appender-ref ref="error" />
+	</root>
+
+</log4j:configuration>

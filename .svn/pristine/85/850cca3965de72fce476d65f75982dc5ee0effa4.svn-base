@@ -1,0 +1,152 @@
+package com.capinfo.wdbl.util;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.poi.POIXMLDocument;
+import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+
+public class WordOperator {
+	
+	private XWPFDocument doc;
+	
+	private Map<String,String> textMap;
+	
+	private File targetFile;
+	
+	public WordOperator(){
+		
+	}
+	
+	public WordOperator(String srcPath,String targetPath,Map<String,String> textMap) throws IOException{
+		this.textMap = textMap;
+		this.targetFile = FileUtils.getFile(targetPath);
+		OPCPackage pack = POIXMLDocument.openPackage(srcPath);
+		this.doc = new XWPFDocument(pack);
+	}
+	
+	public void processText(){
+		this.processParagraphs();
+		this.processTable();
+	}
+	
+	public void outFile() throws IOException{
+		FileOutputStream out = new FileOutputStream(this.targetFile);
+		doc.write(out);
+		out.close();
+	}
+
+	private void processParagraphs(){
+		List<XWPFParagraph> paragraphs = doc.getParagraphs();
+        for (XWPFParagraph tmp : paragraphs) {
+            List<XWPFRun> runs = tmp.getRuns();
+            for (XWPFRun r : runs) {
+                for (Entry<String, String> e : textMap.entrySet()) {
+                    if (r.getText(0).equals(e.getKey())) {
+                        r.setText(textMap.get(r.getText(0)),0);
+                    }
+                }
+            }
+        }
+	}
+	
+	private void processTable(){
+		List<XWPFTable> tables = doc.getTables();
+        for(XWPFTable table:tables){
+        	List<XWPFTableRow> rows = table.getRows();
+        	for(XWPFTableRow row:rows){
+        		List<XWPFTableCell> cells = row.getTableCells();
+        		for(XWPFTableCell cell:cells){
+        			List<XWPFParagraph> cellParagraphs =cell.getParagraphs();
+        			for (XWPFParagraph tmp : cellParagraphs) {
+        	            List<XWPFRun> runs = tmp.getRuns();
+        	            for (XWPFRun r : runs) {
+        	                for (Entry<String, String> e : textMap.entrySet()) {
+        	                    if (r.getText(0)!= null && r.getText(0).equals(e.getKey())) {
+        	                        r.setText(textMap.get(r.getText(0)),0);
+        	                    }
+        	                }
+        	            }
+        	        }
+        		}
+        	}
+        }
+	}
+	
+	public void processPicture(String tag,String picPath,int picType,double width,double height) throws Exception{
+		File picture = new File(picPath);
+		BufferedImage image = ImageIO.read(new FileInputStream(picture));
+		List<XWPFParagraph> paragraphs = doc.getTables().get(2).getRows().get(0).getTableCells().get(1).getParagraphs();
+        for (XWPFParagraph tmp : paragraphs) {
+            List<XWPFRun> runs = tmp.getRuns();
+            for (XWPFRun r : runs) {
+                if(r.getText(0).equals(tag)){
+                	tmp.setSpacingBefore(0);
+                	tmp.setSpacingAfter(0);
+            		r.addPicture(new FileInputStream(picture), picType, picPath, Units.toEMU(image.getWidth()*0.75), Units.toEMU(image.getHeight()*0.75));
+            		r.setText("",0);
+                }
+            }
+        }
+	}
+
+	public XWPFDocument getDoc() {
+		return doc;
+	}
+
+	public void setDoc(XWPFDocument doc) {
+		this.doc = doc;
+	}
+
+	public void processTelegraphPicture(String tag, String picPath, int picType, double width, double height) throws Exception {
+		File picture = new File(picPath);
+		BufferedImage image = ImageIO.read(new FileInputStream(picture));
+		List<XWPFParagraph> paragraphs = doc.getTables().get(0).getRows().get(7).getTableCells().get(0).getParagraphs();
+        for (XWPFParagraph tmp : paragraphs) {
+            List<XWPFRun> runs = tmp.getRuns();
+            for (XWPFRun r : runs) {
+                if(r.getText(0).equals(tag)){
+                	tmp.setSpacingBefore(0);
+                	tmp.setSpacingAfter(0);
+            		r.addPicture(new FileInputStream(picture), picType, picPath, Units.toEMU(image.getWidth()*0.75), Units.toEMU(image.getHeight()*0.75));
+            		r.setText("",0);
+                }
+            }
+        }
+	}
+	
+	public void processPhonePicture(String tag, String picPath, int picType, double width, double height) throws Exception {
+		File picture = new File(picPath);
+		BufferedImage image = ImageIO.read(new FileInputStream(picture));
+		List<XWPFParagraph> paragraphs = doc.getTables().get(1).getRows().get(0).getTableCells().get(0).getParagraphs();
+        for (XWPFParagraph tmp : paragraphs) {
+            List<XWPFRun> runs = tmp.getRuns();
+            for (XWPFRun r : runs) {
+                if(r.getText(0).equals(tag)){
+                	tmp.setSpacingBefore(0);
+                	tmp.setSpacingAfter(0);
+            		r.addPicture(new FileInputStream(picture), picType, picPath, Units.toEMU(image.getWidth()*0.75), Units.toEMU(image.getHeight()*0.75));
+            		r.setText("",0);
+                }
+            }
+        }
+	}
+	
+	
+}

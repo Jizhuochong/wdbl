@@ -1,0 +1,12 @@
+#是否测试
+sys.dug=true
+#文电科的部门编码
+sys.wdDeptCode=11010100
+#文件流水号长度
+file.snLength=8
+#文件barCode长度
+file.barCodeLength=5
+#文件barCode的字母标识
+file.barCodeChar=A
+#web service url
+ws.URL=http://10.8.27.115/webservice/webserver.asmx

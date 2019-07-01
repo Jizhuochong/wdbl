@@ -1,0 +1,50 @@
+package com.capinfo.wdbl.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.capinfo.wdbl.bean.FileSign;
+import com.capinfo.wdbl.dao.FileSignDao;
+import com.capinfo.wdbl.service.FileSignService;
+import com.googlecode.genericdao.search.ISearch;
+import com.googlecode.genericdao.search.SearchResult;
+
+@Service
+public class FileSignServiceImpl implements FileSignService{
+	
+	
+	@Autowired
+	private FileSignDao fileSignDao;
+
+	public SearchResult<FileSign> list(ISearch search){
+		return fileSignDao.searchAndCount(search);
+	}
+	
+	
+	
+	@Override
+	public FileSign load(Long id) {
+		return fileSignDao.find(id);
+	}
+
+
+	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Exception.class)
+	public FileSign add(FileSign fileSign) {
+		fileSignDao.save(fileSign);
+		return fileSign;
+	}
+	
+	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Exception.class)
+	public void update(FileSign fileSign) {
+		fileSignDao.save(fileSign);
+	}
+
+	@Transactional(propagation=Propagation.REQUIRED,rollbackFor=Exception.class)
+	public void delete(Long[] ids) {
+		fileSignDao.removeByIds(ids);
+	}
+	
+
+}

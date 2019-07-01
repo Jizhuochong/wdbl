@@ -1,0 +1,21 @@
+.x-grid-cell {
+	padding: 3px 0px !important;
+	font-size: 12px !important;
+	font-family: "Microsoft Yahei", Arial, "宋体" !important;
+	line-height: 18px
+}
+.x-column-header-text{
+	font-family: "Microsoft Yahei", Arial, "宋体" !important;
+	line-height: 18px !important;
+	font-size: 12px !important;
+	font-weight:bold
+}
+.meeting-rowexpander{
+	font-family: "Microsoft Yahei", Arial, "宋体" !important;
+	line-height: 18px !important;
+	font-size: 11px !important;
+	margin-top:-3px
+}
+.x-form-item-label,.x-btn-inner{
+	font-family: "Microsoft Yahei", Arial, "宋体" !important;
+}

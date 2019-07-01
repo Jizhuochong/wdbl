@@ -1,0 +1,390 @@
+//直接转文
+Ext.define('Wdbl.form.TransferEditForm', {
+	extend : 'Wdbl.form.BaseEditForm',
+	requires : ['Ext.form.FieldSet', 'Ext.form.FieldContainer', 'Ext.form.field.File', 'Ext.form.Label'],
+	transferBtn : null,
+	zhuanwenBtn : null,
+	bar_code : null,
+	modelId : null,
+	/**
+	 * 登记按钮组
+	 * 
+	 * @type Ext.grid.Panel
+	 */
+	newBtns : null,
+	/**
+	 * 办理按钮组
+	 * 
+	 * @type Ext.grid.Panel
+	 */
+	processBtns : null,
+	/////function//////
+	addSave : function() {
+		var me = this;
+		var add = 'reg_file/addSave.do';
+		var load = 'reg_file/loadBean.do';
+		var edit = 'reg_file/editSave.do';
+		var del = 'reg_file/delete.do';
+		var toSend = 'reg_file/toSend.do';
+		var urladdress = null;
+		if(me.addType=="newAdd" || me.addType=="newEdit")
+		{
+			urladdress = me.parent.api.add;
+		}
+		if(me.addType=="process")
+		{
+			urladdress = add;
+		}
+		me.getForm().submit({
+			waitTitle : "请稍候",
+			waitMsg : "正在提交表单数据，请稍候",
+			url : urladdress,
+			params:{docTypeName:'DIRECT_POST_DOC',sessionID:me.id},
+			method : "POST",
+			success : function(form, action) {
+				me.modelId = action.result.data.id;
+				Ext.Array.each(me.ownerCt.editYBtns,function(name,index,_self){me.ownerCt.editYBtns[index].setDisabled(false);});
+
+				me.addType="newEdit";
+				me.loadParam = {'id' : me.modelId},
+				me.load = true;
+				me.loadData();
+				Ext.Msg.alert("提示", action.result.msg);
+			},
+			failure : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			}
+		});
+	},
+	/**
+	 * 修改保存
+	 */
+	editSave : function() {
+		var me = this;
+		var add = 'reg_file/addSave.do';
+		var load = 'reg_file/loadBean.do';
+		var edit = 'reg_file/editSave.do';
+		var del = 'reg_file/delete.do';
+		var toSend = 'reg_file/toSend.do';
+		var urladdress = null;
+		if(me.addType=="newAdd" || me.addType=="newEdit")
+		{
+			urladdress = me.parent.api.edit;
+		}
+		if(me.addType=="process")
+		{
+			urladdress = edit;
+		}
+		me.getForm().submit({
+			waitTitle : "请稍候",
+			waitMsg : "正在提交表单数据，请稍候",
+			url : urladdress,
+			params:{docTypeName:'DIRECT_POST_DOC',sessionID:me.id},
+			method : "POST",
+			success : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			},
+			failure : function(form, action) {
+				Ext.Msg.alert("提示", action.result.msg);
+			}
+		});
+	},
+	removeLeaderCommand : function(btn) {
+		var me = this;
+		me.commandContainer.remove(btn.findParentByType('fieldcontainer'));
+	},
+	addLeaderCommand : function(){
+		var me = this;
+    	var addFileWin = Ext.create('Wdbl.form.op.LeaderCommandForm',{commandContainer:me.commandContainer,removeFun:me.removeLeaderCommand});
+    	addFileWin.show();
+	},
+	// 是否显示按钮
+	f_isShowBtn : function() {
+		var me = this;
+		Ext.Ajax.request({
+			url : 'reg_file/isShowBtn.do',
+			method : "post",
+			params : {ids : me.loadParam.id},
+			scope : this,
+			success : function(response, opts) {
+				var json = Ext.JSON.decode(response.responseText);
+				if(json.msg == "1")
+				{
+					return;
+				}
+			},
+			failure : function() {
+				Ext.Msg.alert('系统提示',json.msg);
+			}
+		}, this);
+	},
+	initComponent : function() {
+		var me = this;
+		me.fileContainer = Ext.create('Wdbl.form.op.FileList', {label:'附件',formObj:me});
+		me.commandContainer = Ext.create('Ext.form.FieldContainer',{});
+		Ext.applyIf(me, {
+			items : [{
+				title : '直接转文('+(me.barNo==null?"":me.barNo)+')',
+				xtype : "fieldset",
+				items : [{
+    				xtype : "textarea",
+    				fieldLabel : "文件标题",
+    				name : "title",
+    				labelWidth:80,
+					padding : '0 0 0 5',
+    				rows : 2,
+    				anchor : '100%'
+    			},{
+					xtype : "fieldcontainer",
+					layout : 'column',
+					items : [{
+						xtype : "hidden",
+						name : "id"
+					},Ext.create('Ext.form.ComboBox',{
+						fieldLabel : "文件类型",
+						columnWidth : 0.25,
+						labelWidth:80,
+						padding : '0 0 0 5',
+						store : getComboDataStore('wjlx'),
+						displayField : 'node',
+						valueField : 'code',
+						emptyText:'请选择',
+    					queryMode: 'local',
+						value: '9',
+						hidden:true
+					}),{
+						columnWidth : 0.25,
+						xtype : "combo",
+						fieldLabel : "来文单位",
+						name : "formUnit",
+						labelWidth:80,
+						padding : '0 0 0 5',
+						store : getComboDataStore('lwdw'),
+						displayField : 'node',
+    					queryMode: 'local',
+						valueField : 'code',
+						mode : 'remote'
+					},{
+						columnWidth : 0.25,
+						xtype : "textfield",
+						labelWidth:80,
+						padding : '0 0 0 5',
+						fieldLabel : "文号",
+						value:"﹝﹞",
+						name : "docNumber",
+						maxLength : 30
+					},Ext.create('Ext.ux.datetime.DateTimeField', {
+						fieldLabel : "来文时间",
+						labelWidth:80,
+						padding : '0 0 0 5',
+						columnWidth : 0.25,
+						value: new Date(),
+					    name : "receiveTime"
+					}),Ext.create('Ext.ux.datetime.DateTimeField', {
+						fieldLabel : "完成期限",
+						columnWidth : 0.25,
+						labelWidth:80,
+						padding : '0 0 0 5',
+						format: 'Y-m-d H:i',
+						name : "deadline"
+					})]
+				},{
+							xtype : "fieldcontainer",
+							layout : 'column',
+							items : [ {
+								columnWidth : 0.25,
+								xtype : "combo",
+								fieldLabel : "密级",
+								name : "securityGrade",
+								labelWidth:80,
+								padding : '0 0 0 5',
+								store : getComboDataStore('mj'),
+								displayField : 'node',
+    							queryMode: 'local',
+								valueField : 'code',
+								mode : 'remote'
+							},{
+								columnWidth : 0.25,
+								xtype : "combo",
+								fieldLabel : "紧急程度",
+								labelWidth:80,
+								padding : '0 0 0 5',
+								name : "urgencyDegree",
+								store : getComboDataStore('jjcd'),
+								displayField : 'node',
+    							queryMode: 'local',
+								valueField : 'code',
+								mode : 'remote'
+							},{
+								columnWidth : 0.25,
+								xtype : "numberfield",
+								labelWidth:80,
+								padding : '0 0 0 5',
+								fieldLabel : "份数",
+								minValue:1,
+								maxValue:999999,
+								value:1,
+								allowDecimals:false,
+								name : "copies"
+							},{
+								columnWidth : 0.15,
+								xtype : "numberfield",
+								fieldLabel : "序号范围",
+								minValue:1,
+								maxValue:999999999,
+								labelWidth:80,
+								padding : '0 0 0 5',
+								allowDecimals:false,
+								index:0,
+								name : "numberRangeStart",
+								listeners:{
+									change: function(){
+										var _minValue= this.minValue;
+										var _allowBlank = true;
+										if(this.getValue()) {
+											_allowBlank = false;
+											_minValue= this.getValue();
+										}
+										Ext.apply(this.nextNode(),{allowBlank:_allowBlank,minValue : _minValue});
+										this.validate(); 
+									}
+								}
+							},{
+								columnWidth : 0.1,
+								xtype : "numberfield",
+								fieldLabel : "至",
+								labelWidth:20,
+								padding : '0 0 0 5',
+								minValue:1,
+								maxValue:999999999,
+								allowDecimals:false,
+								index:1,
+								name : "numberRangeEnd",
+								listeners:{
+									change: function(){
+										var _maxValue=this.maxValue;
+										var _allowBlank = true;
+										if(this.getValue()){
+											_allowBlank = false;
+											_maxValue= this.getValue();
+										}
+										Ext.apply(this.previousNode(),{allowBlank:_allowBlank,maxValue : _maxValue});
+										this.validate(); 
+									}
+								}
+							}]
+					}]
+			},{
+				title : "上级领导批示",
+				xtype : "fieldset",
+				items : [me.commandContainer,{
+					xtype : 'panel',
+					anchor : '100%',
+					border:false,
+					buttons : [{
+						xtype : 'button',
+						text : '添加上级领导批示',
+						listeners : {
+							click : function() {
+								me.addLeaderCommand();
+							}
+						}
+					}]
+				}]
+			}, {
+				title : "其它信息",
+				xtype : "fieldset",
+				items : [ this.fileContainer,{
+					xtype : 'panel',
+					anchor : '100%',
+					border:false,
+					buttons : [{
+						xtype : 'button',
+						text : '添加本地文件',
+						listeners : {
+							click : function() {
+								me.addFile();
+							}
+						}
+					},{
+						xtype : 'button',
+						text : '扫描',
+						listeners : {
+							click : function() {
+								me.addScan();
+							}
+						}
+					},{
+						xtype : 'button',
+						text : '拍照',
+						listeners : {
+							click : function() {
+								me.addPhoto();
+							}
+						}
+					}]
+				},{
+					xtype : "textarea",
+					fieldLabel : "关键字",
+					name : "keyword",
+					rows : 1,
+					labelWidth:80,
+					maxLength:100,
+					anchor : '100%'
+				},{
+					xtype : "textarea",
+					fieldLabel : "备注",
+					name : "remark",
+					labelWidth:80,
+					rows : 2,
+					maxLength: 2000,
+					anchor : '100%'
+				},{
+					xtype : "textarea",
+					fieldLabel : "条码信息",
+					name : "labelInfo",
+					labelWidth:80,
+					rows : 2,
+					maxLength: 2000,
+					anchor : '100%'
+				}]
+			}],
+			buttons : [{
+				text : '保存',
+				formBind : true,
+				monitorValid : true,
+				handler : function(){
+					if(!me.load)
+						me.addSave();
+					else
+						me.editSave();
+				}
+			},{
+				text : '关闭',
+				handler : function(){me.close()},
+				listeners: {
+		            'beforerender': function(){
+		            	if(me.addType == 'process' ){
+		            		this.hide();
+		            	}
+	                }
+		      	}
+			}],
+			listeners: {
+	            'beforerender': {
+	                fn: function(){
+						if(me.addType != 'newAdd'){
+			        		me.f_isShowBtn();
+			        	}
+	                	if (me.load){
+							me.loadData();
+						}
+	                },
+	                scope: me
+	      		}
+	      	}
+		});
+		me.callParent(arguments);
+	}
+
+});

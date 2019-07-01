@@ -1,0 +1,252 @@
+/**
+ * 办结文件
+ */
+
+Ext.define('Wdbl.view.FileOverTab', { extend : 'Ext.tab.Panel', requires : ['Ext.*','Wdbl.form.op.*'],
+	layout : 'fit',
+	//id : 'fileRegTab',
+	border : false,
+	frame : true,
+	innerGrid : null,
+	label_search_win: null,
+	api : {
+		add : null,// 添加
+		load : null,// 加载
+		edit : null,// 修改
+		del : null, // 删除
+		toSend :null
+	},
+	/**
+	 * 编辑
+	 */
+	$edit : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有选中任何记录，无法进行编辑！");
+			return;
+		}
+		var selected = me.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		var title = selected[0].data.title;
+		var docType = selected[0].data.docType;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提醒", "只能编辑一条记录！");
+			return;
+		}
+		var formTypeName = 'Wdbl.form.' + WDBL$Globals.DocTypeEditForms[docType];
+		this.add(Ext.create(formTypeName,{
+			tooltip : '编辑:'+title,
+        	title:'编辑'+title,
+        	closable: true,
+	        parent:me,
+	        grid:me.innerGrid,
+	        load:true,
+	        loadUrl : this.api.load,
+	        loadParam : {'id' : id},
+	        addType:'newEdit',
+	        url : this.api.edit
+        })).show();
+	},
+	// 取消办结
+	f_noFinish : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有选中任何记录，无法进行编辑！");
+			return;
+		}
+		var selected = me.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		var title = selected[0].data.title;
+		var docType = selected[0].data.docType;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提醒", "只能编辑一条记录！");
+			return;
+		}
+		var ids = [];
+		ids.push(id);
+		Ext.Ajax.request({
+			url : 'over_file/noFinish.do',
+			method : "post",
+			params : {ids : ids},
+			scope : this,
+			success : function(response, opts) {
+				var json = Ext.JSON.decode(response.responseText);
+				Ext.Msg.alert('系统提示', json.msg);
+				if (json.success) {
+					me.innerGrid.store.reload();
+				}
+			},
+			failure : function() {
+				Ext.Msg.alert('系统提示','办结失败,请刷新后重新操作!');
+			}
+		}, this);
+	},
+	/**
+	 * 删除
+	 */
+	$del : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有任何行被选中，无法进行删除操作！");
+			return;
+		}
+		var delFlag = false;
+		Ext.Msg.confirm("警告", "确定要删除吗？", function(button) {
+			if (button == "yes") {
+				me.delData();
+			}
+		}, this);
+		
+	},
+	//private 
+	delData : function(){
+		var me = this;
+		var selected = me.innerGrid.selModel.getSelection();
+		var ids = [];
+		Ext.each(selected, function(item) {ids.push(item.data.id);});
+		Ext.Ajax.request({
+			url : this.api.del,
+			method : "post",
+			params : {ids : ids},
+			scope : this,
+			success : function(response, opts) {
+				var json = Ext.JSON.decode(response.responseText);
+				Ext.Msg.alert('系统提示', json.msg);
+				if (json.success) {
+					me.innerGrid.store.reload();
+				}
+			},
+			failure : function() {
+				Ext.Msg.alert('系统提示','删除失败,请刷新后重新操作!');
+			}
+		}, this);
+	},
+	// 打印审批单
+	$f_print : function() {
+		if (this.innerGrid.selModel.hasSelection()) {
+			var selected = this.innerGrid.selModel.getSelection();
+			var id = selected[0].data.id;
+			if (selected.length == 1 && id != null) {
+				var row = this.$getSelectedData;
+				var _url = 'file_export/CITY_GOV_DOC/' + id + '/exportFile.do';
+				window.open(_url);
+			} else {
+				Ext.Msg.alert("提醒", "只能编辑一条记录！");
+			}
+		} else {
+			Ext.Msg.alert("错误", "没有任何行被选中，无法进行编辑操作！");
+		}
+	},
+	//按条码查询
+	$code_search : function(){
+		var gunSearchFrame = Ext.create('Ext.ux.IFrame',{
+	        closable: true,
+	        border:false,
+	        src:'gunSearch.jsp?r='+Math.random()
+		});
+		this.label_search_win = Ext.create('Ext.window.Window',{
+			title:'扫描二维码',
+		    layout: 'fit',  
+		    modal: true, 
+		    plain:true,
+		    width: 480,
+		    height:310,
+		    border: 0,
+		    frame: true,
+		    items: gunSearchFrame,
+		    autoDestroy:true,
+		    destroy:function(){
+		    	if(this.fireEvent("destory",this)!=false){
+		    		window.frames[0].pageClose();
+		    		this.el.remove();
+		    		if(Ext.isIE){
+		    			CollectGarbage();
+		    		}
+		    	}
+		    }
+		});
+		this.label_search_win.show();
+		
+	},
+	//analysis code
+	$analysis_code : function(params){
+		var me = this;
+		Ext.apply(me.innerGrid.store.proxy.extraParams, params);
+		me.innerGrid.store.loadPage(1);
+		this.label_search_win.close();
+	},
+	// 打印条码
+	$f_tm : function() {
+		var me = this;
+		if (!me.innerGrid.selModel.hasSelection()) {
+			Ext.Msg.alert("错误", "没有选中任何记录，无法进行打印条码！");
+			return;
+		}
+		var selected = me.innerGrid.selModel.getSelection();
+		var id = selected[0].data.id;
+		if (selected.length != 1 || id == null) {
+			Ext.Msg.alert("提醒", "只能打印一条条码！");
+			return;
+		}
+	    PrintLabel5025(
+	    "create_over_file", 
+	    "自动", 
+		selected[0].data.barNo?selected[0].data.barNo:"无",
+		selected[0].data.receiveTime?selected[0].data.receiveTime:"无", 
+		selected[0].data.fromUnit?selected[0].data.fromUnit:"无", 
+		selected[0].data.receiveTime?selected[0].data.receiveTime:"无", 
+		selected[0].data.docType?selected[0].data.docType:"无",
+		selected[0].data.docNumber?selected[0].data.docNumber:"无",
+	    selected[0].data.urgencyDegree?selected[0].data.urgencyDegree:"无",
+	    selected[0].data.securityGrade?selected[0].data.securityGrade:"无", 
+	    "无", 
+	    selected[0].data.fromUnit?selected[0].data.fromUnit:"无", 
+	    selected[0].data.title?selected[0].data.title:"无", 
+	    selected[0].data.fromUnit?selected[0].data.fromUnit:"无", 
+	    "", //other
+	    selected[0].data.barNo.replace(/(^\s*)/g,"   "), "", "", "", 10, 10,  2);
+		
+	},
+	initComponent : function() {
+		var me = this;
+		var editBtn = Ext.create('Ext.button.Button',{text : '编辑',iconCls : 'table_edit',handler : function(){me.$edit();}});
+		var tmBtn = Ext.create('Ext.button.Button',{text : '打印条码',iconCls : 'attach',handler : function(){me.$f_tm()}});
+		var searchBtn = Ext.create('Ext.button.Button',{text : '条码查询',iconCls : 'page_code',handler : function(){me.$code_search()}});
+		var delBtn = Ext.create('Ext.button.Button',{text : '删除',iconCls : 'delete',handler : function(){me.$del()}});
+		var printBtn = Ext.create('Ext.button.Button',{text : '打印审批单',iconCls : 'printer',handler : function(){me.$f_print()}});
+		var noFinishBtn = Ext.create('Ext.button.Button',{text : '取消办结',iconCls : 'table_gear',handler : function(){me.f_noFinish();}});
+		var btns = [editBtn,tmBtn,searchBtn,delBtn,printBtn,noFinishBtn];
+		Ext.applyIf(me, {
+			xtype:'tabpanel',
+			layout : 'fit',
+			activeTab: 0,
+            minTabWidth : 100,
+            maxTabWidth : 100,
+            items : [this.innerGrid],
+			dockedItems: [{
+				xtype:'toolbar',
+				dock:'top',
+				items:[
+				editBtn, {xtype : "tbseparator"}, 
+				tmBtn, {xtype : "tbseparator"},
+				searchBtn, {xtype : "tbseparator"}, 
+				delBtn, {xtype : "tbseparator"}, 
+				printBtn, {xtype : "tbseparator"}, 
+				noFinishBtn]
+			}],
+            listeners:{
+            	tabchange : function(tabPanel, newCard, oldCard) {
+					if(newCard.id == me.innerGrid.id){
+						Ext.Array.each(btns,function(name,index,_self){btns[index].setDisabled(false);});
+						me.innerGrid.getStore().reload();
+					}else{
+						Ext.Array.each(btns,function(name,index,_self){btns[index].setDisabled(true);});
+					}
+				}
+            }
+			
+		});
+
+		me.callParent(arguments);
+	}
+});
